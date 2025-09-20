@@ -1,0 +1,2 @@
+cryptography>=42.0.0
+# tkinter is bundled with CPython on macOS and Windows; on some Linux distros use: sudo apt-get install python3-tk
