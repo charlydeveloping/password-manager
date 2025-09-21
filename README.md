@@ -5,7 +5,7 @@ Pequeño gestor de contraseñas con interfaz de escritorio usando Tkinter, cifra
 ## Características
 - Derivación de clave maestra con PBKDF2HMAC (SHA-256)
 - Cifrado/descifrado con Fernet (AEAD)
-- Persistencia local en SQLite (`~/.amparapass/passwords.db`)
+- Persistencia local en SQLite (`~/.amparapass/passwords.db`); salt por usuario almacenado en la tabla `users`
 - Interfaz simple con Tkinter: login y CRUD básico
 
 ## Requisitos
@@ -33,8 +33,8 @@ sudo apt-get update && sudo apt-get install -y python3-tk
 python main.py
 ```
 
-- La primera vez crea `~/.amparapass/`, la base de datos y un archivo de `salt`.
-- Inicia sesión con una contraseña maestra (se derivará la clave y se usará para cifrar/descifrar).
+- Primera vez: regístrate con `username`, nombre, email y contraseña maestra (se generará un salt por usuario en DB).
+- Inicia sesión con `username` + contraseña maestra.
 
 ## Estructura
 
