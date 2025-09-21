@@ -23,6 +23,10 @@ class VaultFrame(ttk.Frame):
         ttk.Button(bar, text="Add", command=self.add_item).pack(side=tk.LEFT, padx=4, pady=4)
         ttk.Button(bar, text="Refresh", command=self.refresh).pack(side=tk.LEFT, padx=4, pady=4)
         ttk.Button(bar, text="Delete", command=self.delete_selected).pack(side=tk.LEFT, padx=4, pady=4)
+        self.btn_show_hide = ttk.Button(bar, text="Show/Hide", command=self._toggle_password, state=tk.DISABLED)
+        self.btn_show_hide.pack(side=tk.LEFT, padx=4, pady=4)
+        self.btn_change_entry = ttk.Button(bar, text="Change Entry Password", command=self._change_selected_password, state=tk.DISABLED)
+        self.btn_change_entry.pack(side=tk.LEFT, padx=4, pady=4)
         ttk.Button(bar, text="Change Password", command=self.change_password).pack(side=tk.RIGHT, padx=4, pady=4)
         ttk.Button(bar, text="Logout", command=self.logout).pack(side=tk.RIGHT, padx=4, pady=4)
 
@@ -33,6 +37,18 @@ class VaultFrame(ttk.Frame):
             self.tree.heading(col, text=col.title())
             self.tree.column(col, stretch=True)
         self.tree.pack(fill=tk.BOTH, expand=True)
+
+        # Helper hint
+        hint = ttk.Label(self, text="Selecciona una fila y usa Mostrar/Ocultar o Cambiar contraseña. También puedes clic derecho para más opciones.")
+        hint.pack(fill=tk.X, padx=6, pady=(2, 6))
+
+        # Track entries whose password is shown (default is masked)
+        self._shown_ids = set()
+        self.tree.bind("<Button-3>", self._on_context_menu)
+        # macOS ctrl+click context menu
+        self.tree.bind("<Control-Button-1>", self._on_context_menu)
+        # Update action buttons when selection changes
+        self.tree.bind("<<TreeviewSelect>>", self._on_selection_changed)
 
         self.refresh()
 
@@ -45,7 +61,14 @@ class VaultFrame(ttk.Frame):
             messagebox.showerror("Error", f"Failed to list passwords: {ex}")
             return
         for it in items:
-            self.tree.insert("", tk.END, values=(it["id"], it["site"], it["username"], it["password"]))
+            pwd = it["password"]
+            if pwd == "<unable to decrypt>":
+                pwd_display = pwd
+            elif it["id"] in self._shown_ids:
+                pwd_display = pwd
+            else:
+                pwd_display = "•" * min(len(pwd), 12)
+            self.tree.insert("", tk.END, values=(it["id"], it["site"], it["username"], pwd_display))
 
     def add_item(self):
         site = simpledialog.askstring("Site", "Enter site")
@@ -88,6 +111,55 @@ class VaultFrame(ttk.Frame):
         # Delegate navigation to the App controller
         if hasattr(self.master, "show_login"):
             self.master.show_login()
+
+    # Context menu actions
+    def _on_context_menu(self, event):
+        iid = self.tree.identify_row(event.y)
+        if not iid:
+            return
+        self.tree.selection_set(iid)
+        menu = tk.Menu(self, tearoff=0)
+        menu.add_command(label="Show/Hide Password", command=self._toggle_password)
+        menu.add_command(label="Change Password", command=self._change_selected_password)
+        menu.add_separator()
+        menu.add_command(label="Delete", command=self.delete_selected)
+        menu.tk_popup(event.x_root, event.y_root)
+
+    def _get_selected_entry(self):
+        sel = self.tree.selection()
+        if not sel:
+            return None
+        values = self.tree.item(sel[0], "values")
+        return int(values[0]) if values else None
+
+    def _on_selection_changed(self, _event=None):
+        has_selection = bool(self.tree.selection())
+        self.btn_show_hide.configure(state=(tk.NORMAL if has_selection else tk.DISABLED))
+        self.btn_change_entry.configure(state=(tk.NORMAL if has_selection else tk.DISABLED))
+
+    def _toggle_password(self):
+        entry_id = self._get_selected_entry()
+        if entry_id is None:
+            return
+        if entry_id in self._shown_ids:
+            self._shown_ids.remove(entry_id)
+        else:
+            self._shown_ids.add(entry_id)
+        self.refresh()
+
+    def _change_selected_password(self):
+        entry_id = self._get_selected_entry()
+        if entry_id is None:
+            return
+        new_pw = simpledialog.askstring("Change Password", "Enter new password", show='*')
+        if not new_pw:
+            return
+        try:
+            services.update_password(self.user_id, self.key, entry_id, new_pw)
+        except Exception as ex:
+            messagebox.showerror("Error", f"Failed to update password: {ex}")
+            return
+        self.refresh()
 
     def change_password(self):
         old_pw = simpledialog.askstring("Old Password", "Enter old password", show='*')

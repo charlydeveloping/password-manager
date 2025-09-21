@@ -145,3 +145,9 @@ def change_master_password(user_id: int, old_password: str, new_password: str) -
     # update verifier
     new_verifier = crypto.encrypt("verification", new_key)
     storage.update_user_verifier(user_id, new_verifier)
+
+
+def update_password(user_id: int, key: bytes, entry_id: int, new_password: str) -> None:
+    """Update a single vault entry's password by re-encrypting its secret."""
+    token = crypto.encrypt(new_password, key)
+    storage.update_entry_secret(entry_id, token, user_id)
