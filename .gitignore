@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 .env
-.amparapass/
+.passwordmanager/
 dist/
 build/
 .venv/

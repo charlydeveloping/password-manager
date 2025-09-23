@@ -1,11 +1,11 @@
-# AmparaPass - Password Manager (Tkinter)
+# PasswordManager - Password Manager (Tkinter)
 
 Pequeño gestor de contraseñas con interfaz de escritorio usando Tkinter, cifrado con `cryptography` (Fernet) y almacenamiento en SQLite.
 
 ## Características
 - Derivación de clave maestra con PBKDF2HMAC (SHA-256)
 - Cifrado/descifrado con Fernet (AEAD)
-- Persistencia local en SQLite (`~/.amparapass/passwords.db`); salt por usuario almacenado en la tabla `users`
+- Persistencia local en SQLite (`~/.passwordmanager/passwords.db`); salt por usuario almacenado en la tabla `users`
 - Interfaz simple con Tkinter: login y CRUD básico
 
 ## Requisitos
@@ -46,7 +46,3 @@ python main.py
 - `app/config.py`: rutas y constantes.
 - `tests/`: pruebas unitarias básicas.
 
-## Notas de seguridad
-- Este proyecto es educativo; revisa y fortalece antes de uso real.
-- La rotación de `salt` romperá los datos existentes; no la cambies sin plan de migración.
-- Considera ocultar la contraseña en el Treeview y copiar al portapapeles bajo demanda.

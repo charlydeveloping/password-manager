@@ -17,24 +17,25 @@ class VaultFrame(ttk.Frame):
         bar.pack(fill=tk.X)
         # User info
         info = services.get_user_profile(self.user_id) or {"full_name": "", "email": "", "username": ""}
-        self.user_label = ttk.Label(bar, text=f"User: {info['full_name']} <{info['email']}>".strip())
+        self.user_label = ttk.Label(bar, text=f"Usuario: {info['full_name']} <{info['email']}>".strip())
         self.user_label.pack(side=tk.LEFT, padx=6)
 
-        ttk.Button(bar, text="Add", command=self.add_item).pack(side=tk.LEFT, padx=4, pady=4)
-        ttk.Button(bar, text="Refresh", command=self.refresh).pack(side=tk.LEFT, padx=4, pady=4)
-        ttk.Button(bar, text="Delete", command=self.delete_selected).pack(side=tk.LEFT, padx=4, pady=4)
-        self.btn_show_hide = ttk.Button(bar, text="Show/Hide", command=self._toggle_password, state=tk.DISABLED)
+        ttk.Button(bar, text="Agregar", command=self.add_item).pack(side=tk.LEFT, padx=4, pady=4)
+        ttk.Button(bar, text="Actualizar", command=self.refresh).pack(side=tk.LEFT, padx=4, pady=4)
+        ttk.Button(bar, text="Eliminar", command=self.delete_selected).pack(side=tk.LEFT, padx=4, pady=4)
+        self.btn_show_hide = ttk.Button(bar, text="Mostrar/Ocultar", command=self._toggle_password, state=tk.DISABLED)
         self.btn_show_hide.pack(side=tk.LEFT, padx=4, pady=4)
-        self.btn_change_entry = ttk.Button(bar, text="Change Entry Password", command=self._change_selected_password, state=tk.DISABLED)
+        self.btn_change_entry = ttk.Button(bar, text="Cambiar Contraseña", command=self._change_selected_password, state=tk.DISABLED)
         self.btn_change_entry.pack(side=tk.LEFT, padx=4, pady=4)
-        ttk.Button(bar, text="Change Password", command=self.change_password).pack(side=tk.RIGHT, padx=4, pady=4)
-        ttk.Button(bar, text="Logout", command=self.logout).pack(side=tk.RIGHT, padx=4, pady=4)
+        ttk.Button(bar, text="Cambiar Clave Maestra", command=self.change_password).pack(side=tk.RIGHT, padx=4, pady=4)
+        ttk.Button(bar, text="Cerrar Sesión", command=self.logout).pack(side=tk.RIGHT, padx=4, pady=4)
 
         # Treeview
         columns = ("id", "site", "username", "password")
+        column_headers = {"id": "ID", "site": "Sitio", "username": "Usuario", "password": "Contraseña"}
         self.tree = ttk.Treeview(self, columns=columns, show="headings", selectmode="browse", height=12)
         for col in columns:
-            self.tree.heading(col, text=col.title())
+            self.tree.heading(col, text=column_headers[col])
             self.tree.column(col, stretch=True)
         self.tree.pack(fill=tk.BOTH, expand=True)
 
@@ -58,7 +59,7 @@ class VaultFrame(ttk.Frame):
         try:
             items = services.list_passwords(self.user_id, self.key)
         except Exception as ex:
-            messagebox.showerror("Error", f"Failed to list passwords: {ex}")
+            messagebox.showerror("Error", f"Error al listar contraseñas: {ex}")
             return
         for it in items:
             pwd = it["password"]
@@ -71,19 +72,19 @@ class VaultFrame(ttk.Frame):
             self.tree.insert("", tk.END, values=(it["id"], it["site"], it["username"], pwd_display))
 
     def add_item(self):
-        site = simpledialog.askstring("Site", "Enter site")
+        site = simpledialog.askstring("Sitio", "Ingrese el sitio web")
         if not site:
             return
-        username = simpledialog.askstring("Username", "Enter username")
+        username = simpledialog.askstring("Usuario", "Ingrese el nombre de usuario")
         if not username:
             return
-        password = simpledialog.askstring("Password", "Enter password", show="*")
+        password = simpledialog.askstring("Contraseña", "Ingrese la contraseña", show="*")
         if password is None:
             return
         try:
             services.add_password(self.user_id, self.key, site, username, password)
         except Exception as ex:
-            messagebox.showerror("Error", f"Failed to add: {ex}")
+            messagebox.showerror("Error", f"Error al agregar: {ex}")
             return
         self.refresh()
 
@@ -93,15 +94,15 @@ class VaultFrame(ttk.Frame):
             return
         values = self.tree.item(sel[0], "values")
         entry_id = int(values[0])
-        if not messagebox.askyesno("Confirm", "Delete selected entry?"):
+        if not messagebox.askyesno("Confirmar", "¿Eliminar la entrada seleccionada?"):
             return
         ok = services.delete_password(self.user_id, entry_id)
         if not ok:
-            messagebox.showwarning("Not found", "Entry not deleted")
+            messagebox.showwarning("No encontrado", "Entrada no eliminada")
         self.refresh()
 
     def logout(self):
-        if not messagebox.askyesno("Confirm", "Return to login?"):
+        if not messagebox.askyesno("Confirmar", "¿Volver al inicio de sesión?"):
             return
         try:
             # Best-effort: clear key reference
@@ -119,10 +120,10 @@ class VaultFrame(ttk.Frame):
             return
         self.tree.selection_set(iid)
         menu = tk.Menu(self, tearoff=0)
-        menu.add_command(label="Show/Hide Password", command=self._toggle_password)
-        menu.add_command(label="Change Password", command=self._change_selected_password)
+        menu.add_command(label="Mostrar/Ocultar Contraseña", command=self._toggle_password)
+        menu.add_command(label="Cambiar Contraseña", command=self._change_selected_password)
         menu.add_separator()
-        menu.add_command(label="Delete", command=self.delete_selected)
+        menu.add_command(label="Eliminar", command=self.delete_selected)
         menu.tk_popup(event.x_root, event.y_root)
 
     def _get_selected_entry(self):
@@ -151,32 +152,32 @@ class VaultFrame(ttk.Frame):
         entry_id = self._get_selected_entry()
         if entry_id is None:
             return
-        new_pw = simpledialog.askstring("Change Password", "Enter new password", show='*')
+        new_pw = simpledialog.askstring("Cambiar Contraseña", "Ingrese la nueva contraseña", show='*')
         if not new_pw:
             return
         try:
             services.update_password(self.user_id, self.key, entry_id, new_pw)
         except Exception as ex:
-            messagebox.showerror("Error", f"Failed to update password: {ex}")
+            messagebox.showerror("Error", f"Error al actualizar contraseña: {ex}")
             return
         self.refresh()
 
     def change_password(self):
-        old_pw = simpledialog.askstring("Old Password", "Enter old password", show='*')
+        old_pw = simpledialog.askstring("Contraseña Anterior", "Ingrese la contraseña anterior", show='*')
         if old_pw is None:
             return
-        new_pw = simpledialog.askstring("New Password", "Enter new password", show='*')
+        new_pw = simpledialog.askstring("Nueva Contraseña", "Ingrese la nueva contraseña", show='*')
         if new_pw is None:
             return
-        new_pw2 = simpledialog.askstring("Confirm", "Confirm new password", show='*')
+        new_pw2 = simpledialog.askstring("Confirmar", "Confirme la nueva contraseña", show='*')
         if new_pw2 is None:
             return
         if new_pw != new_pw2:
-            messagebox.showwarning("Mismatch", "Passwords do not match")
+            messagebox.showwarning("Error de confirmación", "Las contraseñas no coinciden")
             return
         try:
             services.change_master_password(self.user_id, old_pw, new_pw)
         except Exception as ex:
-            messagebox.showerror("Error", f"Failed to change password: {ex}")
+            messagebox.showerror("Error", f"Error al cambiar contraseña: {ex}")
             return
-        messagebox.showinfo("Success", "Master password updated")
+        messagebox.showinfo("Éxito", "Contraseña maestra actualizada")

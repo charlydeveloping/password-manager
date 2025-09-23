@@ -13,11 +13,11 @@ class LoginFrame(ttk.Frame):
 
         self.columnconfigure(1, weight=1)
 
-        ttk.Label(self, text="Username:").grid(row=0, column=0, padx=8, pady=8, sticky=tk.W)
+        ttk.Label(self, text="Usuario:").grid(row=0, column=0, padx=8, pady=8, sticky=tk.W)
         self.username_var = tk.StringVar()
         ttk.Entry(self, textvariable=self.username_var).grid(row=0, column=1, padx=8, pady=8, sticky=tk.EW)
 
-        ttk.Label(self, text="Master password:").grid(row=1, column=0, padx=8, pady=8, sticky=tk.W)
+        ttk.Label(self, text="Contraseña maestra:").grid(row=1, column=0, padx=8, pady=8, sticky=tk.W)
         self.password_var = tk.StringVar()
         self.password_entry = ttk.Entry(self, textvariable=self.password_var, show="*")
         self.password_entry.grid(row=1, column=1, padx=8, pady=8, sticky=tk.EW)
@@ -25,21 +25,21 @@ class LoginFrame(ttk.Frame):
 
         btns = ttk.Frame(self)
         btns.grid(row=2, column=0, columnspan=2, padx=8, pady=8, sticky=tk.EW)
-        self.login_btn = ttk.Button(btns, text="Login", command=self.login)
+        self.login_btn = ttk.Button(btns, text="Iniciar Sesión", command=self.login)
         self.login_btn.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0,4))
-        self.register_btn = ttk.Button(btns, text="Register", command=self.register)
+        self.register_btn = ttk.Button(btns, text="Registrarse", command=self.register)
         self.register_btn.pack(side=tk.LEFT, expand=True, fill=tk.X)
 
     def login(self):
         user = self.username_var.get().strip()
         pw = self.password_var.get().strip()
         if not user or not pw:
-            messagebox.showwarning("Missing", "Please enter username and password")
+            messagebox.showwarning("Campos requeridos", "Por favor ingrese usuario y contraseña")
             return
         try:
             user_id, key = services.login(user, pw)
         except Exception as ex:
-            messagebox.showerror("Error", f"Login failed: {ex}")
+            messagebox.showerror("Error", f"Error de inicio de sesión: {ex}")
             return
         # callback expects (user_id, key)
         try:
