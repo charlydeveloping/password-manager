@@ -1,11 +1,11 @@
-# PasswordManager - Password Manager (Tkinter)
+# Charly Password Manager - Gestor de Contraseñas (Tkinter)
 
 Pequeño gestor de contraseñas con interfaz de escritorio usando Tkinter, cifrado con `cryptography` (Fernet) y almacenamiento en SQLite.
 
 ## Características
 - Derivación de clave maestra con PBKDF2HMAC (SHA-256)
 - Cifrado/descifrado con Fernet (AEAD)
-- Persistencia local en SQLite (`~/.passwordmanager/passwords.db`); salt por usuario almacenado en la tabla `users`
+- Persistencia local en SQLite (`~/.charly-password-manager/passwords.db`); salt por usuario almacenado en la tabla `users`
 - Interfaz simple con Tkinter: login y CRUD básico
 
 ## Requisitos

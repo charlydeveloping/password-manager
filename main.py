@@ -1,4 +1,4 @@
-"""Entry point for the Password Manager app.
+"""Entry point for the Charly Password Manager app.
 
 This launches a simple Tkinter GUI. Run as:
     python -m main

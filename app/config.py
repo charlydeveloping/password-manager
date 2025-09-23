@@ -1,7 +1,7 @@
 """
-Project configuration for the Password Manager.
-- App data directory: ~/.passwordmanager/
-- Database path: ~/.passwordmanager/passwords.db
+Project configuration for the Charly Password Manager.
+- App data directory: ~/.charly-password-manager/
+- Database path: ~/.charly-password-manager/passwords.db
 
 Notes
 -----
@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-APP_NAME = "passwordmanager"
+APP_NAME = "charly-password-manager"
 APP_DIR = Path.home() / f".{APP_NAME}"
 DB_FILENAME = "passwords.db"
 

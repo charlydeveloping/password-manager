@@ -12,7 +12,7 @@ from .register import RegisterFrame
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Gestor de Contraseñas")
+        self.title("Charly Password Manager")
         self.geometry("720x480")
 
         self.current_frame: Optional[ttk.Frame] = None
